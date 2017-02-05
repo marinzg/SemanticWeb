@@ -1,0 +1,13 @@
+<h1>Home#index</h1>
+<p>Find me in app/views/home/index.html.erb</p>
+<%= @text %>
+<!--
+queryable = SPARQL::Client.new("http://192.168.56.12:3030")
+query = %{
+  SELECT (COUNT(*) as ?count)
+   WHERE {?s ?p ?o}
+}
+#sse = SPARQL::Grammar.parse(query)
+#p queryable
+p @text = queryable.query(query)
+-->
