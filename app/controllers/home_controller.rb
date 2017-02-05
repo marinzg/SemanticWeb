@@ -38,6 +38,14 @@ class HomeController < ApplicationController
   end
 
   def searchresults
-    @a = params.require(:query)
+    query_text = params.require(:query)
+    sparql_endpoint = SPARQL::Client.new("http://192.168.56.12:3030/LMDB/sparql")
+    queries = Sparql.new
+
+    @actors = sparql_endpoint.query(queries.main_query_actors(query_text))
+
+
+
+    @movies = sparql_endpoint.query(queries.main_query_movies(query_text))
   end
 end

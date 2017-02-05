@@ -1,1 +1,32 @@
-<%= @a %>
+<div class="container">
+  <h1>Actors:</h1>
+  <div class="container">
+    <table class="table table-hover">
+      <tbody>
+        <% @actors.each do |actor| %>
+        <tr>
+          <td>
+            <%= actor.name.humanize %>
+          </td>
+        </tr>
+        <%end%>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="container">
+  <h1>Movies:</h1>
+  <div class="container">
+    <table class="table table-hover">
+      <tbody>
+        <% @movies.each do |actor| %>
+        <tr>
+          <td>
+            <%= actor.title.humanize %>
+          </td>
+        </tr>
+        <%end%>
+      </tbody>
+    </table>
+  </div>
+</div>

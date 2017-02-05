@@ -5,8 +5,6 @@ class Sparql
   attr_accessor :number_of_directors_query
 
 
-
-
   def initialize()
     init_number_of_triplets
     init_number_of_movies
@@ -88,5 +86,31 @@ class Sparql
       } LIMIT 5
     }
     return actors_birthday_query
+  end
+
+
+  def main_query_movies(query_text)
+    movies_query = %{
+      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
+      PREFIX dc: <http://purl.org/dc/terms/>
+      SELECT DISTINCT ?title
+      WHERE {
+        ?movie dc:title ?title .
+        FILTER(REGEX(?title, "#{query_text}"))
+      }
+    }
+  end
+
+  def main_query_actors(query_text)
+    actors = %{
+      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
+      PREFIX dc: <http://purl.org/dc/terms/>
+      SELECT DISTINCT ?name
+      WHERE {
+        ?actor a lmdb:actor .
+        ?actor lmdb:actor_name ?name
+        FILTER(REGEX(?name, "#{query_text}"))
+      }
+    }
   end
 end
