@@ -1,14 +1,38 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>SemanticWeb</title>
+    <title>Movies SW</title>
     <%= csrf_meta_tags %>
 
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   </head>
 
   <body>
-    <%= yield %>
+    <div class="container" >
+      <div class="container" >
+      </br>
+        <%= form_tag("/home/searchresults", method: "post", class: 'form-horizontal') do %>
+          <div class="form-group">
+            <label for="query" class="control-label col-sm-2" style="font-size:190%; padding-top:0px">LMDB</label>
+            <div class="col-sm-8">
+              <input type="text" name="query" id="query" value="" class="form-control" placeholder="type in movie title or actors name" />
+            </div>
+            <%= submit_tag "Search", class: "btn btn-default"%>
+          </div>
+        <% end %>
+      </div>
+      <%= yield %>
+    </div>
   </body>
+
 </html>

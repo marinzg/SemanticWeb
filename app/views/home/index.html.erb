@@ -1,13 +1,30 @@
-<h1>Home#index</h1>
-<p>Find me in app/views/home/index.html.erb</p>
-<%= @text %>
-<!--
-queryable = SPARQL::Client.new("http://192.168.56.12:3030")
-query = %{
-  SELECT (COUNT(*) as ?count)
-   WHERE {?s ?p ?o}
-}
-#sse = SPARQL::Grammar.parse(query)
-#p queryable
-p @text = queryable.query(query)
--->
+<div class="container" >
+  <h1> 3 random movies: </h1>
+  <div class="container">
+  <%  @three_random_movies.each do |movie| %>
+
+
+    <p><%= movie %> </p>
+    <%end%>
+  </div>
+  </br>
+  </br>
+  <h1> Happy birthday! </h1>
+  <!-- for birthdays -->
+</br>
+</br></br>
+</br></br>
+</br>
+</br></br>
+</br></br>
+</br>
+</br><hr>
+<div class="container">
+  <p>
+    Number of triplets = <%=@numberOfTriplets%>; &nbsp;&nbsp;
+    Number of movies = <%=@numberOfMovies%>; &nbsp;&nbsp;
+    Number of classes = <%=@numberOfClasses%>; &nbsp;&nbsp;
+    Number of directors = <%=@numberOfDirectors%>
+  </p>
+</div>
+</div>

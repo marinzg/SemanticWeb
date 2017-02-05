@@ -2,29 +2,42 @@ require 'rubygems'
 require 'sparql/grammar'
 require 'rdf'
 require 'linkeddata'
+require 'set'
 
 class HomeController < ApplicationController
   def index
     sparql_endpoint = SPARQL::Client.new("http://192.168.56.12:3030/LMDB/sparql")
+    queries = Sparql.new
 
-    query = %{
-      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
-      SELECT DISTINCT ?actorName
-      WHERE {
-         ?kb lmdb:actor_name "Kevin Bacon" .
-         ?movie lmdb:actor ?kb .
-         ?movie lmdb:actor ?actor .
-         ?actor lmdb:actor_name ?actorName .
-         FILTER (?kb != ?actor)
-      }
-      ORDER BY ASC(?actorName)
-    }
-    p @text =  sparql_endpoint.query(query)
 
-    @text.each do |sol|
-      p
-      p sol.actorName.humanize(lang = :en)
-      p
+    #get statistic data about used sources
+    @numberOfTriplets = sparql_endpoint.query(queries.number_of_triplets_query)[0].numberOfTriplets
+    @numberOfMovies = sparql_endpoint.query(queries.number_of_movies_query)[0].numberOfMovies
+    @numberOfClasses = sparql_endpoint.query(queries.number_of_classes_query)[0].numberOfClasses
+    @numberOfDirectors = sparql_endpoint.query(queries.number_of_directors_query)[0].numberOfDirectors
+
+
+    #get 3 random movies
+    #@numberOfMovies = 10
+    random_numbers = Set.new
+    @three_random_movies = []
+
+    while random_numbers.count < 3
+      random_numbers << Random.rand(@numberOfMovies)
     end
+
+    random_numbers.each do |d|
+      three_random_movies_query = queries.three_random_movies_query(d)
+      @three_random_movies << sparql_endpoint.query(three_random_movies_query)[0].title.humanize
+    end
+
+
+    #get all actors that have birthday today
+    #this query has to be fixed on faster internet
+    #@actors_birthday = sparql_endpoint.query(query.actors_born_today)
+  end
+
+  def searchresults
+    @a = params.require(:query)
   end
 end
