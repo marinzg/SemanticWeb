@@ -43,9 +43,23 @@ class HomeController < ApplicationController
     queries = Sparql.new
 
     @actors = sparql_endpoint.query(queries.main_query_actors(query_text))
-
-
-
     @movies = sparql_endpoint.query(queries.main_query_movies(query_text))
+  end
+
+  def actor
+    name = params.require(:name)
+    sparql_endpoint = SPARQL::Client.new("http://192.168.56.12:3030/LMDB/sparql")
+    queries = Sparql.new
+    @act = sparql_endpoint.query(queries.get_actor_query(name))
+
+    if @act.count < 1
+      sparql_endpoint = SPARQL::Client.new("https://dbpedia.org/sparql")
+      uri = sparql_endpoint.query(queries.get_dbpedia_link(name))[0].actorUrl.to_s
+      @act = sparql_endpoint.query(queries.get_actor_special(uri))
+    end
+  end
+
+  def movie
+    title = params.require(:title)
   end
 end

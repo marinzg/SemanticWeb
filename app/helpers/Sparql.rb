@@ -113,4 +113,73 @@ class Sparql
       }
     }
   end
+
+  def get_actor_query(actor)
+    actor = %{
+      PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
+      PREFIX dbpo: <http://dbpedia.org/ontology/>
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      SELECT  DISTINCT ?birthday ?birthplace ?about ?imgUrl
+      WHERE {
+        {
+          ?movie lmdb:actor ?actor .
+          ?actor lmdb:actor_name "#{actor}" .
+          ?actor owl:sameAs ?actorUrl .
+          FILTER(REGEX(STR(?actorUrl), "dbpedia")).
+          SERVICE <http://dbpedia.org/sparql> {
+            ?actorUrl a dbpo:Person.
+            ?actorUrl dbpo:birthDate ?birthday .
+            ?actorUrl dbpo:birthPlace ?birthplace .
+            ?actorUrl dbpo:abstract ?about .
+            FILTER(LANG(?about) = "en")
+          }
+        }
+        UNION
+        {
+          ?movie lmdb:actor ?actor .
+          ?actor lmdb:actor_name "#{actor}" .
+          ?actor owl:sameAs ?actorUrl .
+          FILTER(REGEX(STR(?actorUrl), "dbpedia")).
+          SERVICE <http://dbpedia.org/sparql> {
+             ?actorUrl foaf:depiction ?imgUrl .
+           }
+        }
+      }
+    }
+  end
+
+  def get_dbpedia_link(name)
+    get_dbpedia_link = %{
+      PREFIX  dbo: <http://dbpedia.org/ontology/>
+      PREFIX  dbp: <http://dbpedia.org/property/>
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      SELECT  ?actorUrl
+      WHERE {
+          ?actorUrl a dbo:Person.
+          ?actorUrl rdfs:label "#{name}"@en .
+      }
+    }
+  end
+
+  def get_actor_special(uri)
+    #uri = uri.gsub(/page/, "resource")
+    get_autor_special = %{
+      PREFIX  dbo: <http://dbpedia.org/ontology/>
+      PREFIX  dbp: <http://dbpedia.org/property/>
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      SELECT  ?birthday ?birthplace ?about ?imgUrl
+      WHERE {
+        {<#{uri}> dbo:birthDate ?birthday }
+        UNION
+        {<#{uri}> dbo:birthPlace ?birthplace }
+        UNION
+        {<#{uri}> dbo:abstract ?about .
+        FILTER(LANG(?about) = "en")}
+        UNION
+        { <#{uri}> foaf:depiction ?imgUrl }
+      }
+    }
+  end
 end

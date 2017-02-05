@@ -5,7 +5,7 @@
       <tbody>
         <% @actors.each do |actor| %>
         <tr>
-          <td>
+          <td onClick="actor('<%= actor.name.humanize %>')">
             <%= actor.name.humanize %>
           </td>
         </tr>
@@ -14,15 +14,16 @@
     </table>
   </div>
 </div>
+
 <div class="container">
   <h1>Movies:</h1>
   <div class="container">
     <table class="table table-hover">
       <tbody>
-        <% @movies.each do |actor| %>
+        <% @movies.each do |movie| %>
         <tr>
-          <td>
-            <%= actor.title.humanize %>
+          <td onClick="movie('<%= movie.title.humanize %>')">
+            <%= movie.title.humanize %>
           </td>
         </tr>
         <%end%>
@@ -30,3 +31,11 @@
     </table>
   </div>
 </div>
+<script>
+function actor(name) {
+  window.location = 'actor?name=' + name;
+}
+function movie(title) {
+  window.location = 'movie?title=' + title;
+}
+</script>
