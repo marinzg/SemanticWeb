@@ -3,8 +3,8 @@
   <div class="container">
   <%  @three_random_movies.each do |movie| %>
 
-
-    <p><%= movie %> </p>
+    <a href="/home/movie?title=<%= movie %>"> <%= movie %> </a>
+    <br>
     <%end%>
   </div>
   </br>

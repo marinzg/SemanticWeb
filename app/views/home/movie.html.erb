@@ -1,1 +1,22 @@
-<%= @mov %>
+<br>
+<br>
+<div class="container">
+  <div class="container">
+    <h4> Title: <span style="font-weight: normal;"><%= @title %></span></h4>
+
+    <h4> Actors:
+      <% @actors.each do |actor| %>
+      <span style="font-weight: normal;">
+        <%= actor %>, &nbsp;&nbsp;&nbsp;
+      </span>
+      <%end%>
+
+    </h4>
+
+    <h4> Date: <span style="font-weight: normal;"><%= @date %></span> <h4>
+    <h4> Director: <span style="font-weight: normal;"><%= @directorName %></span> <h4>
+    <br>
+    <h4> About: </h3>
+    <p><%= @about %></p>
+  </div>
+</div>

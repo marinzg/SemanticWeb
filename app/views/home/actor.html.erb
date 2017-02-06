@@ -1,1 +1,19 @@
-<%= @act %>
+<br>
+<br>
+<div class="container">
+  <div class="inline-news-left">
+        <img style="width:100%; vertical-align:inherit;" src="<%= @imgUrl %>" onerror="this.src='http://localhost:3000/assets/headshot.png'">
+    
+
+  </div>
+  <div class="inline-news-right">
+    <h4> Full name: <span style="font-weight: normal;"><%= @name %></span></h4>
+
+    <h4> Birthday: <span style="font-weight: normal;"><%= @birthday %></span> </h4>
+
+    <h4> Birthplace: <span style="font-weight: normal;"><%= @birthplace %></span> <h4>
+    <br>
+    <h4> About: </h3>
+    <p><%= @about %></p>
+  </div>
+</div>

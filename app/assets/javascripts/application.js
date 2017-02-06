@@ -14,3 +14,9 @@
 //= require jquery_ujs
 //= require turbolinks
 //= require_tree .
+function actor(name) {
+  window.location = 'actor?name=' + name;
+}
+function movie(title) {
+  window.location = 'movie?title=' + title;
+}

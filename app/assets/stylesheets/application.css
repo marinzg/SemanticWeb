@@ -13,3 +13,15 @@
  *= require_tree .
  *= require_self
  */
+ .inline-news-left{
+   vertical-align: top;
+   display: inline-block;
+   width: 20%;
+   margin-right: 2%;
+   margin-top: 10px;
+ }
+
+ .inline-news-right{
+   display: inline-block;
+   width: 70%;
+ }

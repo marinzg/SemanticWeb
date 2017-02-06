@@ -69,25 +69,70 @@ class Sparql
   end
 
   def actors_born_today
+    date = Time.now.strftime("%m-%d")
     actors_birthday_query = %{
       PREFIX owl:  <http://www.w3.org/2002/07/owl#>
       PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
       PREFIX dbpo: <http://dbpedia.org/ontology/>
-      SELECT DISTINCT ?actorName ?birthday
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      SELECT ?actorName
       WHERE {
-        ?movie lmdb:actor ?actor.
-        ?actor lmdb:actor_name ?actorName.
-        ?actor owl:sameAs ?url .
-        FILTER(REGEX(STR(?url), "dbpedia")).
-        SERVICE <http://dbpedia.org/sparql> {
-          ?url a dbpo:Person.
-          ?url dbpo:birthDate ?birthday .
+          ?movie lmdb:actor ?actor .
+          ?actor lmdb:actor_name ?name .
+          SERVICE <http://dbpedia.org/sparql> {
+            SELECT *
+             WHERE {
+               ?myActor a dbpo:Person.
+               ?myActor rdfs:label ?myActorName .
+               ?myActor dbpo:birthDate ?birthDate .
+               FILTER(STR(?myActorName) = ?name)
+               FILTER(REGEX(STR(?birthDate),  "02-19")).
+             }
+          }
         }
-      } LIMIT 5
     }
     return actors_birthday_query
   end
 
+  def people_born_today
+    date = Time.now.strftime("%m-%d")
+    people = %{
+      PREFIX  dbpo: <http://dbpedia.org/ontology/>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      SELECT *
+      WHERE {
+        ?myActor a dbpo:Person.
+        ?myActor rdfs:label ?myActorName .
+        ?myActor dbpo:birthDate ?birthDate .
+        FILTER(REGEX(STR(?birthDate),  "#{date}")).
+        FILTER(LANG(?myActorName) = "en")
+      }
+    }
+  end
+
+  def people_actors_born_today(name)
+    actors = %{
+      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
+      SELECT ?name
+      WHERE {
+        ?movie lmdb:actor ?actor .
+        ?actor lmdb:actor_name ?name .
+        FILTER(?name = "#{name}")
+      }
+    }
+  end
+
+  def all_actors_query
+    actors = %{
+      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
+      SELECT ?name
+      WHERE {
+        ?movie lmdb:actor ?actor .
+        ?actor lmdb:actor_name ?name .
+      }
+    }
+  end
 
   def main_query_movies(query_text)
     movies_query = %{
@@ -114,40 +159,150 @@ class Sparql
     }
   end
 
-  def get_actor_query(actor)
+
+  def get_actor_by_uri_query(name)
     actor = %{
       PREFIX owl:  <http://www.w3.org/2002/07/owl#>
       PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
       PREFIX dbpo: <http://dbpedia.org/ontology/>
       PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-      SELECT  DISTINCT ?birthday ?birthplace ?about ?imgUrl
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      SELECT  DISTINCT ?name ?birthday ?birthplace ?about ?imgUrl
       WHERE {
-        {
           ?movie lmdb:actor ?actor .
-          ?actor lmdb:actor_name "#{actor}" .
+          ?actor lmdb:actor_name "#{name}" .
+          ?actor lmdb:actor_name ?name .
           ?actor owl:sameAs ?actorUrl .
           FILTER(REGEX(STR(?actorUrl), "dbpedia")).
           SERVICE <http://dbpedia.org/sparql> {
             ?actorUrl a dbpo:Person.
             ?actorUrl dbpo:birthDate ?birthday .
-            ?actorUrl dbpo:birthPlace ?birthplace .
+            ?actorUrl dbpo:birthPlace ?birthplaceUrl .
+            ?birthplaceUrl rdfs:label ?birthplace .
             ?actorUrl dbpo:abstract ?about .
+            ?actorUrl foaf:depiction ?imgUrl .
             FILTER(LANG(?about) = "en")
           }
-        }
-        UNION
-        {
-          ?movie lmdb:actor ?actor .
-          ?actor lmdb:actor_name "#{actor}" .
-          ?actor owl:sameAs ?actorUrl .
-          FILTER(REGEX(STR(?actorUrl), "dbpedia")).
-          SERVICE <http://dbpedia.org/sparql> {
-             ?actorUrl foaf:depiction ?imgUrl .
-           }
-        }
+
       }
     }
   end
+
+  def get_actor_by_name_query(name)
+    actor = %{
+      PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
+      PREFIX dbpo: <http://dbpedia.org/ontology/>
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      SELECT  DISTINCT ?name ?birthday ?birthplace ?about ?imgUrl
+      WHERE {
+          ?movie lmdb:actor ?actor .
+          ?actor lmdb:actor_name "#{name}" .
+          ?actor lmdb:actor_name ?name .
+          SERVICE <http://dbpedia.org/sparql> {
+            SELECT *
+            WHERE {
+                ?myActor a dbpo:Person.
+                ?myActor rdfs:label ?myActorName .
+                ?myActor dbpo:birthDate ?birthday .
+                ?myActor dbpo:birthPlace ?birthplaceUrl .
+                ?birthplaceUrl rdfs:label ?birthplace .
+                ?myActor dbpo:abstract ?about .
+                ?myActor foaf:depiction ?imgUrl .
+                FILTER(LANG(?about) = "en")
+                FILTER(STR(?myActorName) = ?name)
+            }
+          }
+        }
+    }
+  end
+
+
+  def get_movie_by_uri(title)
+    movie = %{
+      PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
+      PREFIX dbpo: <http://dbpedia.org/ontology/>
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX dc: <http://purl.org/dc/terms/>
+      SELECT  DISTINCT ?title ?actorName ?date ?directorName ?about
+      WHERE {
+          ?movie a lmdb:film .
+          ?movie dc:title "#{title}" .
+          ?movie dc:title ?title .
+          ?movie lmdb:actor ?actor .
+          ?actor lmdb:actor_name ?actorName .
+          ?movie dc:date ?date .
+          ?movie lmdb:director ?director .
+          ?director lmdb:director_name ?directorName .
+
+          ?movie owl:sameAs ?movieURI .
+          FILTER(REGEX(STR(?movieURI), "dbpedia")).
+          SERVICE <http://dbpedia.org/sparql>{
+            ?movieURI dbpo:abstract ?about
+            FILTER(LANG(?about) = "en")
+          }
+        }
+    }
+  end
+
+  def get_movie_by_title(title)
+    p "by title"
+    movie = %{
+      PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
+      PREFIX dbpo: <http://dbpedia.org/ontology/>
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX dc: <http://purl.org/dc/terms/>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      SELECT  DISTINCT ?title ?actorName ?date ?directorName ?about
+      WHERE {
+          ?movie a lmdb:film .
+          ?movie dc:title "#{title}" .
+          ?movie dc:title ?title .
+          ?movie dc:date ?date .
+          SERVICE <http://dbpedia.org/sparql>{
+            SELECT *
+            WHERE {
+              ?myMovie a dbpo:Film.
+              ?myMovie rdfs:label ?myFilmTitle .
+              ?myMovie dbpo:starring ?actor .
+              ?actor dbpo:birthName ?actorName .
+              ?myMovie dbpo:director ?director .
+              ?director rdfs:label ?directorName .
+              ?myMovie dbpo:abstract ?about .
+              FILTER(LANG(?about) = "en")
+              FILTER(LANG(?actorName) = "en")
+              FILTER(LANG(?directorName) = "en")
+              FILTER(STR(?myFilmTitle) = ?title)
+            }
+          }
+        }
+    }
+  end
+
+  def get_movie_from_lmdb(title)
+    movie = %{
+      PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+      PREFIX lmdb: <http://data.linkedmdb.org/resource/movie/>
+      PREFIX dbpo: <http://dbpedia.org/ontology/>
+      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+      PREFIX dc: <http://purl.org/dc/terms/>
+      SELECT  DISTINCT ?title ?actorName ?date ?directorName ?about
+      WHERE {
+          ?movie a lmdb:film .
+          ?movie dc:title "#{title}" .
+          ?movie dc:title ?title .
+          ?movie lmdb:actor ?actor .
+          ?actor lmdb:actor_name ?actorName .
+          ?movie dc:date ?date .
+        }
+    }
+  end
+
+
+
 
   def get_dbpedia_link(name)
     get_dbpedia_link = %{
@@ -164,7 +319,6 @@ class Sparql
   end
 
   def get_actor_special(uri)
-    #uri = uri.gsub(/page/, "resource")
     get_autor_special = %{
       PREFIX  dbo: <http://dbpedia.org/ontology/>
       PREFIX  dbp: <http://dbpedia.org/property/>
