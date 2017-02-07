@@ -1,10 +1,10 @@
 <br>
 <br>
+<div id="actorLangDiv" class="container">
+</div>
 <div class="container">
   <div class="inline-news-left">
         <img style="width:100%; vertical-align:inherit;" src="<%= @imgUrl %>" onerror="this.src='http://localhost:3000/assets/headshot.png'">
-    
-
   </div>
   <div class="inline-news-right">
     <h4> Full name: <span style="font-weight: normal;"><%= @name %></span></h4>
@@ -17,3 +17,20 @@
     <p><%= @about %></p>
   </div>
 </div>
+<script>
+  var option = '<%= @lang %>';
+  var langs = ['en', 'fr', 'de', 'es'];
+  var fulLangs = ['English', 'French', 'German', 'Spanish'];
+  var select = '<select id="actorLangSelect" onchange="changeLang(\'<%= @name %>\', value, \'actor\')">';
+
+  for(var i = 0; i < langs.length; i++) {
+    if(langs[i] == option)
+      {select += '<option selected value="' + langs[i] + '">' + fulLangs[i] + '</option>';}
+    else
+      {select += '<option value="' + langs[i] + '">' + fulLangs[i] + '</option>';}
+  }
+  select += '</select>';
+
+  document.getElementById('actorLangDiv').innerHTML = select;
+
+</script>

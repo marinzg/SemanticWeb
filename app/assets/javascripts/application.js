@@ -15,8 +15,18 @@
 //= require turbolinks
 //= require_tree .
 function actor(name) {
-  window.location = 'actor?name=' + name;
+  window.location = 'actor?name=' + name + '&lang=en';
 }
 function movie(title) {
-  window.location = 'movie?title=' + title;
+  window.location = 'movie?title=' + title + '&lang=en';
+}
+function changeLang(name,lang, type){
+
+      if(type=='actor') {
+        window.location = 'actor?name=' + name + '&lang=' + lang;
+      }
+    	if(type=='movie'){
+        window.location = 'movie?title=' + name + '&lang=' + lang;
+      }
+    
 }

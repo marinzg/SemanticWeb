@@ -18,7 +18,6 @@ class HomeController < ApplicationController
 
 
     #get 3 random movies
-    #@numberOfMovies = 10
     random_numbers = Set.new
     @three_random_movies = []
 
@@ -33,25 +32,21 @@ class HomeController < ApplicationController
 
 
     #get all actors that have birthday today
-    #this query has to be fixed on faster internet
-    #@actors_birthday = sparql_endpoint.query(query.actors_born_today)
     sparql_endpoint_dbpedia = SPARQL::Client.new("https://dbpedia.org/sparql")
-    people_born_today = sparql_endpoint_dbpedia.query(queries.people_born_today)
-    all_actors = sparql_endpoint.query(queries.all_actors_query)
-    #p all_actors
+    people_born_today = sparql_endpoint_dbpedia.query(queries.dbpedia_people_born_today_query)
+
     @actors_born_today = []
+    actors_filter_list = "FILTER("
+
     people_born_today.each do |person|
       personName = person.myActorName.humanize
-
-      all_actors.each do |actor|
-        if personName == actor.name.humanize
-          @actors_born_today << personName
-        end
-      end
-      p personName
-    #  @actors_born_today << sparql_endpoint.query(queries.people_actors_born_today(actorName))
+      personName = personName.gsub(/\"/, '\"')
+      actors_filter_list << "?name = \"#{personName}\" || \n"
     end
-    p @actors_born_today
+
+    actors_filter_list = actors_filter_list[0..-5] + ")"
+    @actors_born_today = sparql_endpoint.query(queries.actors_born_today_query(actors_filter_list))
+
   end
 
   def searchresults
@@ -59,33 +54,29 @@ class HomeController < ApplicationController
     sparql_endpoint = SPARQL::Client.new("http://192.168.56.12:3030/LMDB/sparql")
     queries = Sparql.new
 
-    @actors = sparql_endpoint.query(queries.main_query_actors(query_text))
-    @movies = sparql_endpoint.query(queries.main_query_movies(query_text))
+    @actors = sparql_endpoint.query(queries.actor_query(query_text))
+    @movies = sparql_endpoint.query(queries.movie_query(query_text))
   end
 
 
-#napraviti združeni upit preko imena glumca paziti na ime glumca na određenom jeziku
   def actor
     name = params.require(:name)
+    @lang = lang = params.require(:lang)
     sparql_endpoint = SPARQL::Client.new("http://192.168.56.12:3030/LMDB/sparql")
     queries = Sparql.new
-    @act = sparql_endpoint.query(queries.get_actor_by_uri_query(name))
 
-    if @act.count < 1
-      @act = sparql_endpoint.query(queries.get_actor_by_name_query(name))
+    actors = sparql_endpoint.query(queries.get_actor_use_uri_query(name, lang))
 
-      #USE THIS CODE IF PREVIOUS LINE DOESN'T WORK
-      #sparql_endpoint = SPARQL::Client.new("https://dbpedia.org/sparql")
-      #uri = sparql_endpoint.query(queries.get_dbpedia_link(name))[0].actorUrl.to_s
-      #@act = sparql_endpoint.query(queries.get_actor_special(uri))
+    if actors.count < 1
+      actors = sparql_endpoint.query(queries.get_actor_use_name_query(name, lang))
     end
-    #?name ?birthday ?birthplace ?about ?imgUrl
-    if @act[0] != nil
-      @name = @act[0].name
-      @birthday = @act[0].birthday
-      @birthplace = @act[0].birthplace
-      @about = @act[0].about
-      @imgUrl = @act[0].imgUrl
+
+    if actors[0] != nil
+      @name = actors[0].name
+      @birthday = actors[0].bound?("birthday") ? actors[0].birthday : "Could not get the data!"
+      @birthplace = actors[0].bound?("birthplace") ? actors[0].birthplace : "Could not get the data!"
+      @about = actors[0].bound?("about") ? actors[0].about : "Could not get the data!"
+      @imgUrl = actors[0].bound?("imgUrl") ? actors[0].imgUrl : "Could not get the data!"
     else
       @name = name
       @birthday = "Could not get the data!"
@@ -93,41 +84,37 @@ class HomeController < ApplicationController
       @about = "Could not get the data!"
       @imgUrl = "Could not get the data!"
     end
-
-
-
-
   end
 
   def movie
     title = params.require(:title)
+    @lang = lang = params.require(:lang)
     sparql_endpoint = SPARQL::Client.new("http://192.168.56.12:3030/LMDB/sparql")
     queries = Sparql.new
-    flag = 0
-    @mov = sparql_endpoint.query(queries.get_movie_by_uri(title))
-    if @mov.count < 1
-      @mov = sparql_endpoint.query(queries.get_movie_by_title(title))
+
+    movies = sparql_endpoint.query(queries.get_movie_use_uri(title, lang))
+
+    if movies.count < 1
+      movies = sparql_endpoint.query(queries.get_movie_use_title(title, lang))
     end
 
-    if @mov.count < 1
-      flag = 1
-      @mov = sparql_endpoint.query(queries.get_movie_from_lmdb(title))
-    end
-    p @mov
+    @title = title
+    if movies[0] != nil
+      @actors = []
+      movies.each do |movie|
+        if movie.bound?("acotrName")
+          @actors << movie.actorName.humanize
+        end
+      end
 
-    #?title ?actorName ?date ?directorName ?screenWriter ?about
-    @title = @mov[0].title
-    @actors = []
-    @mov.each do |act|
-      @actors << act.actorName.humanize
-    end
-    @date = @mov[0].date
-    if flag == 0
-      @directorName = @mov[0].directorName
-      @about = @mov[0].about
+      @date = movies[0].bound?("date") ? movies[0].date : "Could not get the data!"
+      @directorName = movies[0].bound?("directorName") ? movies[0].directorName : "Could not get the data!"
+      @about = movies[0].bound?("about") ? movies[0].about : "Could not get the data!"
     else
-      @directorName = "No data"
-      @about = "No data"
+      @actors = ["Could not get the data!"]
+      @date = "Could not get the data!"
+      @directorName = "Could not get the data!"
+      @about = "Could not get the data!"
     end
   end
 end

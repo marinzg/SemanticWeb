@@ -1,5 +1,7 @@
 <br>
 <br>
+<div id="movieLangDiv" class="container">
+</div>
 <div class="container">
   <div class="container">
     <h4> Title: <span style="font-weight: normal;"><%= @title %></span></h4>
@@ -20,3 +22,21 @@
     <p><%= @about %></p>
   </div>
 </div>
+
+<script>
+  var option = '<%= @lang %>';
+  var langs = ['en', 'fr', 'de', 'es'];
+  var fulLangs = ['English', 'French', 'German', 'Spanish'];
+  var select = '<select id="movieLangSelect" onchange="changeLang(\'<%= @title %>\', value, \'movie\')">';
+
+  for(var i = 0; i < langs.length; i++) {
+    if(langs[i] == option)
+      {select += '<option selected value="' + langs[i] + '">' + fulLangs[i] + '</option>';}
+    else
+      {select += '<option value="' + langs[i] + '">' + fulLangs[i] + '</option>';}
+  }
+  select += '</select>';
+
+  document.getElementById('movieLangDiv').innerHTML = select;
+
+</script>

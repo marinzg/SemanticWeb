@@ -1,16 +1,35 @@
 <div class="container" >
   <h1> 3 random movies: </h1>
   <div class="container">
-  <%  @three_random_movies.each do |movie| %>
-
-    <a href="/home/movie?title=<%= movie %>"> <%= movie %> </a>
-    <br>
-    <%end%>
+    <table class="table table-hover">
+      <tbody>
+        <% @three_random_movies.each do |movie| %>
+        <tr>
+          <td onClick="movie('<%= movie %>')">
+            <%= movie %>
+          </td>
+        </tr>
+        <%end%>
+      </tbody>
+    </table>
   </div>
   </br>
   </br>
   <h1> Happy birthday! </h1>
   <!-- for birthdays -->
+  <div class="container">
+    <table class="table table-hover">
+      <tbody>
+        <% @actors_born_today.each do |actor| %>
+        <tr>
+          <td onClick="actor('<%= actor.name.humanize %>')">
+            <%= actor.name.humanize %>
+          </td>
+        </tr>
+        <%end%>
+      </tbody>
+    </table>
+  </div>
 </br>
 </br></br>
 </br></br>
