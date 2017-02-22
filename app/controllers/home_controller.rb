@@ -102,7 +102,7 @@ class HomeController < ApplicationController
     if movies[0] != nil
       @actors = []
       movies.each do |movie|
-        if movie.bound?("acotrName")
+        if movie.bound?("actorName")
           @actors << movie.actorName.humanize
         end
       end
